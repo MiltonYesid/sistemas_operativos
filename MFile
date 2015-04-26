@@ -1,0 +1,164 @@
+/*
+
+MILTON FERNANDEZ
+Acceso de archivos y memoria dinamica
+
+*/
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*
+http://www.elrincondelc.com/cursoc/cursoc.html
+
+puntero = (tipo_de_variable *) malloc( número de bytes a reservar );
+
+free( puntero );
+*/
+
+
+struct materias {
+	char nombre;
+	float nota;
+	int creditos;
+
+};
+
+ int main(int argc, char *argv[]){
+ 	
+ FILE *origen, *destino;
+    char letra;
+    char texto[100];
+
+    origen=fopen(argv[1],"r");
+    destino=fopen(argv[2],"w");
+    if (origen==NULL || destino==NULL)
+       {
+       printf( "Problemas con los ficheros.\n" );
+       exit( 1 );
+       }
+    //letra=getc(origen);
+    /*
+    putc -> escribe el caracter en el archivo
+    puts -> escribe la cadena en el archivo
+    */
+    int cantidadlineas;
+    /*
+     Se obtiene la cantidad de lineas del fichero y se reserva la memoria respectiva
+    */
+    while (feof(origen)==0)
+          {
+        	// putc(letra,destino);
+         	//rintf( "%c",letra );
+          	//letra=getc(origen);
+          	cantidadlineas++;
+          	fgets(texto,100,origen);
+          	
+          }
+        //  printf("la cantidad de lineas son %i",cantidadlineas-2);
+          int cantidadLineas = cantidadlineas-2;
+          /*
+          this get sizeof from struct materias
+          */
+         // printf("la cantidad de memoria reserva es  %i", sizeof(struct materias));
+          int sizeOfMaterias = sizeof(struct materias)*cantidadLineas;
+          /*
+          by reserve of memmory
+          */
+          struct materias *puntMaterias;
+		  puntMaterias = (struct materias *) malloc( sizeOfMaterias);
+         // printf("capacidad reservada %i",sizeOfMaterias);
+           printf("\n");
+    
+    /*
+    Se vuelve a recorrer el archivo y se obtiene la informacion
+    se realiza una parse con respecto a la estructura materia y se realizan las operaciones respectivas
+    */
+    
+    	rewind(origen);
+  		char *pch;
+  		int count = 0;
+    	struct materias estrucMaterias[cantidadLineas];
+    	
+    //	printf("\n la posicion actual de la memoria dinamica base ******* %i",puntMaterias);
+          while (feof(origen)==0)
+          {
+          	count++;
+          	fgets(texto,100,origen);
+          	/*
+          	Los limites de lectura del archivo
+          	*/
+          	if(count!=1 && count!=cantidadlineas)
+          	{
+          	//	printf("\n columna de ingreso %i\n",count);
+	         	pch = strtok(texto, ";");
+	         	int c = 0;
+				while(pch != NULL){
+					c++;
+					printf("\n");
+					printf(pch);
+					switch(c)
+					{
+						case 1:
+							(puntMaterias+count-2)->nombre = (char)pch;
+						//		printf("\n la posicion actual de la memoria dinamica %i",puntMaterias+count-2);
+							break;
+						case 2:
+							
+							(puntMaterias+count-2)->nota = (float)atof(pch);
+						//	printf("\n la posicion actual de la memoria dinamica %i",puntMaterias+count-2);
+							break;
+						case 3:
+							(puntMaterias+count-2)->creditos = (int) atoll(pch);
+						//	printf("\n la posicion actual de la memoria dinamica %i",puntMaterias+count-2);
+							
+							break;
+						default:
+							printf("defaul");
+							break;
+					}
+				
+				
+			//	printf ("%s\n",pch);
+				pch=strtok(NULL, ";");
+				}
+			}
+          }
+          
+          /*
+          Operaciones
+          */
+          float promedioPonderado =0;
+          int cantidadCreditos = 0;
+          int i=0;
+          for(i=0; i <cantidadLineas;i++)
+          {
+          	promedioPonderado += ((puntMaterias+i)->nota * (puntMaterias+i)->creditos);
+			float n = ((puntMaterias+i)->nota);
+			int cred = ((puntMaterias+i)->creditos);
+			printf("\n n vae %f creditos %i",n,cred);
+			cantidadCreditos = cantidadCreditos + (puntMaterias+i)->creditos;
+		  }
+		  float pp = promedioPonderado/cantidadCreditos;
+         /*
+         liberacion de memoria
+         */
+         free(puntMaterias );
+         /*
+         Escribir en el archivo
+         */
+        fprintf(destino,"\n");
+		  fprintf(destino,"Cantidad de creditos: %i", cantidadCreditos);
+		  fprintf(destino,"\n");
+		  fprintf(destino,"nota parcial: %f", promedioPonderado);
+		  fprintf(destino,"\n");
+		  fprintf(destino,"el promedio ponderado acumulado fue: %f", pp);
+        // fputs(const char *cadena, FILE *fichero);
+    if (fclose(origen)!=0)
+       printf( "Problemas al cerrar el fichero origen.txt\n" );
+    if (fclose(destino)!=0)
+       printf( "Problemas al cerrar el fichero destino.txt\n" );
+    }
